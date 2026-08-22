@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const int RESIZE_CONSTANT = 2;
+#define RESIZE_FACTOR 2
 
 /*
  * "DynamicArray": Array with Dynamic features such as auto resizing and length tracking.
@@ -16,9 +16,10 @@ typedef struct {
 } DynamicArray;
 
 int init(DynamicArray *arr, size_t init_cap);
-int resize(DynamicArray *arr);
+static int resize(DynamicArray *arr);
 int push(DynamicArray *arr, int payload);
 int pop(DynamicArray *arr, int *out_value);
+void free_dynamic_array(DynamicArray *arr);
 
 int main() {
     DynamicArray arr;
@@ -29,7 +30,7 @@ int main() {
 
     for (int i = 0; i < 5; i++) {
         if (push(&arr, i) == EXIT_FAILURE) {
-            fprintf(stderr, "Failed to push %d into array", i);
+            fprintf(stderr, "Failed to push %d into array\n", i);
         }
 
         printf("capacity: %zu, size: %zu\n", arr.capacity, arr.size);
@@ -42,7 +43,7 @@ int main() {
         printf("Could not pop because the array was empty\n");
     }
 
-    free(arr.data);
+    free_dynamic_array(&arr);
 
     return EXIT_SUCCESS;
 }
@@ -93,14 +94,14 @@ int resize(DynamicArray *arr) {
      * Reallocate the array safely.
      * realloc the base array with existing data and new capacity.
      */
-    int *temp = realloc(arr->data, (arr->capacity * RESIZE_CONSTANT) * sizeof(*temp));
+    int *temp = realloc(arr->data, (arr->capacity * RESIZE_FACTOR) * sizeof(*temp));
     if (temp == NULL) {
         fprintf(stderr, "failed to resize the array\n");
         return EXIT_FAILURE;
     }
 
     arr->data = temp;
-    arr->capacity *= RESIZE_CONSTANT;
+    arr->capacity *= RESIZE_FACTOR;
 
     return EXIT_SUCCESS;
 }
@@ -145,11 +146,24 @@ int pop(DynamicArray *arr, int *out_value) {
     }
 
     // Pass the popped data safely through the out-pointer
-    *out_value = arr->data[arr->size - 1];
+    if (out_value != NULL) {
+        *out_value = arr->data[arr->size - 1];
+    }
 
     // Clear out the slot and track size
     arr->data[arr->size - 1] = 0;
     arr->size--;
 
     return EXIT_SUCCESS;
+}
+
+void free_dynamic_array(DynamicArray *arr) {
+    if (arr == NULL) {
+        return;
+    }
+
+    free(arr->data);
+    arr->data = NULL;
+    arr->capacity = 0;
+    arr->size = 0;
 }
