@@ -16,7 +16,7 @@ typedef struct {
 } DynamicArray;
 
 int init_dynamic_array(DynamicArray *arr, size_t init_cap);
-void resize_dynamic_array(DynamicArray *arr);
+int resize_dynamic_array(DynamicArray *arr);
 
 int main() {
     DynamicArray arr;
@@ -55,16 +55,25 @@ int init_dynamic_array(DynamicArray *arr, size_t init_cap) {
     return EXIT_SUCCESS;
 }
 
-void resize_dynamic_array(DynamicArray *arr) {
+int resize_dynamic_array(DynamicArray *arr) {
     if (arr == NULL || arr->data == NULL) {
         printf("Failed to resize, either dynamic array or base array is NULL");
-        exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     if (arr->capacity > arr->size) {
-        printf("cannot resize a dynamic array when capacity is not reached");
-        return;
+        printf("cannot resize a dynamic array when capacity is not reached\n");
+        return EXIT_FAILURE;
     }
 
-    int *temp = realloc(arr->data, (arr->capacity * RESIZE_CONSTANT) * sizeof(int));
+    int *temp = realloc(arr->data, (arr->capacity * RESIZE_CONSTANT) * sizeof(*temp));
+    if (temp == NULL) {
+        printf("failed to resize the array\n");
+        return EXIT_FAILURE;
+    }
+
+    arr->data = temp;
+    arr->capacity *= RESIZE_CONSTANT;
+
+    return EXIT_SUCCESS;
 }
