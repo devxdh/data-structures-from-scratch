@@ -15,17 +15,28 @@ typedef struct {
     size_t size;     // number of elements present in the array
 } DynamicArray;
 
-int init_dynamic_array(DynamicArray *arr, size_t init_cap);
-int resize_dynamic_array(DynamicArray *arr);
+int init(DynamicArray *arr, size_t init_cap);
+int resize(DynamicArray *arr);
+int push(DynamicArray *arr, int payload);
 
 int main() {
     DynamicArray arr;
-    int res = init_dynamic_array(&arr, 2);
+    int res = init(&arr, 2);
     if (res == EXIT_FAILURE) {
         fprintf(stderr, "failed to initialize the dynamic array\n");
         return EXIT_FAILURE;
     }
 
+    for (int i = 0; i < 5; i++) {
+        printf("capacity: %zu, size: %zu\n", arr.capacity, arr.size);
+
+        int pushStatus = push(&arr, i);
+        if (pushStatus == EXIT_FAILURE) {
+            fprintf(stderr, "Failed to push %d into array", i);
+        }
+    }
+
+    printf("capacity: %zu, size: %zu\n", arr.capacity, arr.size);
     return EXIT_SUCCESS;
 }
 
@@ -33,7 +44,7 @@ int main() {
  * Allocates space for an array with initial capacity.
  * Takes a DynamicArray and an inital capacity.
  */
-int init_dynamic_array(DynamicArray *arr, size_t init_cap) {
+int init(DynamicArray *arr, size_t init_cap) {
     if (arr == NULL || init_cap == 0) {
         return EXIT_FAILURE;
     }
@@ -58,7 +69,7 @@ int init_dynamic_array(DynamicArray *arr, size_t init_cap) {
 /*
  * Safely resizes the array
  */
-int resize_dynamic_array(DynamicArray *arr) {
+int resize(DynamicArray *arr) {
     // there is no point in resizing the array or base array if either of them is null
     if (arr == NULL || arr->data == NULL) {
         fprintf(stderr, "Failed to resize, either dynamic array or base array is NULL\n");
@@ -87,6 +98,7 @@ int resize_dynamic_array(DynamicArray *arr) {
     return EXIT_SUCCESS;
 }
 
+// Pushes an element into dynamic array
 int push(DynamicArray *arr, int payload) {
     if (arr == NULL || arr->data == NULL) {
         fprintf(stderr, "failed to push payload as either dynamic array or base array is NULL\n");
@@ -95,14 +107,14 @@ int push(DynamicArray *arr, int payload) {
 
     // If capacity is reached then we resize the array
     if (arr->capacity == arr->size) {
-        int resizeResult = resize_dynamic_array(arr);
+        int resizeResult = resize(arr);
         if (resizeResult == EXIT_FAILURE) {
             fprintf(stderr, "failed to push as capacity is reached and resize failed\n");
             return EXIT_FAILURE;
         }
     }
 
-    // add the element to base array and update size
+    // Add the element to the base array and update the size
     arr->data[arr->size] = payload;
     arr->size++;
 
