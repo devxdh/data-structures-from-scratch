@@ -4,13 +4,13 @@
 const int RESIZE_CONSTANT = 2;
 
 /*
- * "DynamicArray": Array with Dynamic features such as auto resizing and length track.
+ * "DynamicArray": Array with Dynamic features such as auto resizing and length tracking.
  *
  * It uses a regular C array with custom metadata attached to it.
  * Based on metadata, it automatically rallocates the size of the base array.
  */
 typedef struct {
-    int *data;       // regular array
+    int *data;       // regular/base array
     size_t capacity; // number of elements the array can hold
     size_t size;     // number of elements present in the array
 } DynamicArray;
@@ -73,8 +73,7 @@ int resize_dynamic_array(DynamicArray *arr) {
 
     /*
      * Reallocate the array safely.
-     *  - 1. realloc the base array with existing data and new capacity.
-     *  - 2. then safely make the base array point to the new resized array.
+     * realloc the base array with existing data and new capacity.
      */
     int *temp = realloc(arr->data, (arr->capacity * RESIZE_CONSTANT) * sizeof(*temp));
     if (temp == NULL) {
