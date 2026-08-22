@@ -18,31 +18,38 @@ typedef struct {
 int init(DynamicArray *arr, size_t init_cap);
 int resize(DynamicArray *arr);
 int push(DynamicArray *arr, int payload);
+int pop(DynamicArray *arr, int *out_value);
 
 int main() {
     DynamicArray arr;
-    int res = init(&arr, 2);
-    if (res == EXIT_FAILURE) {
+    if (init(&arr, 2) == EXIT_FAILURE) {
         fprintf(stderr, "failed to initialize the dynamic array\n");
         return EXIT_FAILURE;
     }
 
     for (int i = 0; i < 5; i++) {
-        printf("capacity: %zu, size: %zu\n", arr.capacity, arr.size);
-
-        int pushStatus = push(&arr, i);
-        if (pushStatus == EXIT_FAILURE) {
+        if (push(&arr, i) == EXIT_FAILURE) {
             fprintf(stderr, "Failed to push %d into array", i);
         }
+
+        printf("capacity: %zu, size: %zu\n", arr.capacity, arr.size);
     }
 
-    printf("capacity: %zu, size: %zu\n", arr.capacity, arr.size);
+    int item;
+    if (pop(&arr, &item) == EXIT_SUCCESS) {
+        printf("Successfully popped: %d\n", item);
+    } else {
+        printf("Could not pop because the array was empty\n");
+    }
+
+    free(arr.data);
+
     return EXIT_SUCCESS;
 }
 
 /*
  * Allocates space for an array with initial capacity.
- * Takes a DynamicArray and an inital capacity.
+ * Takes a DynamicArray and an inital capacity as arguments.
  */
 int init(DynamicArray *arr, size_t init_cap) {
     if (arr == NULL || init_cap == 0) {
@@ -117,6 +124,32 @@ int push(DynamicArray *arr, int payload) {
     // Add the element to the base array and update the size
     arr->data[arr->size] = payload;
     arr->size++;
+
+    return EXIT_SUCCESS;
+}
+
+/*
+ * Deletes the last element from an array
+ *
+ * takes a dynamic array and a pointer (to send popped data out safely) as arguments
+ */
+int pop(DynamicArray *arr, int *out_value) {
+    if (arr == NULL || arr->data == NULL) {
+        fprintf(stderr, "Failed to pop, either dynamic array or base array is NULL\n");
+        return EXIT_FAILURE;
+    }
+
+    if (arr->size == 0) {
+        fprintf(stderr, "failed to pop, array is empty\n");
+        return EXIT_FAILURE;
+    }
+
+    // Pass the popped data safely through the out-pointer
+    *out_value = arr->data[arr->size - 1];
+
+    // Clear out the slot and track size
+    arr->data[arr->size - 1] = 0;
+    arr->size--;
 
     return EXIT_SUCCESS;
 }
