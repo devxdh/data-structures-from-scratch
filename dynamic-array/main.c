@@ -21,6 +21,7 @@ int push(DynamicArray *arr, int payload);
 int pop(DynamicArray *arr, int *out_value);
 void free_dynamic_array(DynamicArray *arr);
 
+// Entry point to test our Dynamic Array Implementation
 int main() {
     DynamicArray arr;
     if (init(&arr, 2) == EXIT_FAILURE) {
